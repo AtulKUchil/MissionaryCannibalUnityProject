@@ -25,12 +25,11 @@ public class CharacterSelection : MonoBehaviour
         CannibalLeft.Add(GameObject.Find("C1"));
         CannibalLeft.Add(GameObject.Find("C2"));
         CannibalLeft.Add(GameObject.Find("C3"));
+        
     }
     // Update is called once per frame
     void Update()
     {
-        // if(MissionaryLeft.Count >= CannibalLeft.Count && MissionaryRight.Count >= CannibalRight.Count)
-        // {
             if (Input.GetMouseButtonDown(0)&&AllowSelection )
             {
             
@@ -47,12 +46,14 @@ public class CharacterSelection : MonoBehaviour
                         {
                             if (!bankSideRight)
                             {
+                                //Moving boat to Right Bank
                                 //rayHit.transform.position = Vector2.Lerp(rayHit.transform.position, new Vector2(2.0f, -3.5f), 1f);
                                 StartCoroutine(MoveBoat(selectedObject,new Vector2(2.0f, -3.5f)));
                                 bankSideRight = true;
                             }
                             else
                             {
+                                //Moving boat to Left bank
                                 //rayHit.transform.position = Vector2.Lerp(rayHit.transform.position, new Vector2(-2.0f, -3.5f), 1f);
                                 StartCoroutine(MoveBoat(selectedObject,new Vector2(-2.0f, -3.5f)));
                                 bankSideRight = false;
@@ -63,22 +64,27 @@ public class CharacterSelection : MonoBehaviour
                     else if(rayHit.collider.CompareTag("Missionary"))
                     {
                         //Missionary
-                        if (IfMissionaryOnLeftBank(selectedObject) && peopleOnBoard.Count < 2 && !peopleOnBoard.Contains(selectedObject))
+                        if ( peopleOnBoard.Count < 2 && !peopleOnBoard.Contains(selectedObject) && !bankSideRight && MissionaryLeft.Contains(selectedObject))
                         {
+                            //Adding Missionary to the boat from the Left bank
                             rayHit.transform.parent = boat.transform;
                             rayHit.transform.localPosition = boatTop;
                             MissionaryLeft.Remove(selectedObject);
+                            // MissionaryRight.Add(selectedObject);
                             peopleOnBoard.Add(selectedObject);
                         }
-                        else if (!IfMissionaryOnLeftBank(selectedObject) && peopleOnBoard.Count < 2 && !peopleOnBoard.Contains(selectedObject))
+                        else if ( peopleOnBoard.Count < 2 && !peopleOnBoard.Contains(selectedObject) && bankSideRight && MissionaryRight.Contains(selectedObject))
                         {
+                            //Adding Missionary to the boat from the Right Bank
                             rayHit.transform.parent = boat.transform;
                             rayHit.transform.localPosition = boatTop;
                             MissionaryRight.Remove(selectedObject);
+                            // MissionaryLeft.Add(selectedObject);
                             peopleOnBoard.Add(selectedObject);
                         }
                         else if (peopleOnBoard.Contains(selectedObject) && !bankSideRight)
                         {
+                            //Adding Missionary to the Left Bank from the boat
                             rayHit.transform.position = leftBank;
                             rayHit.transform.parent = null;
                             peopleOnBoard.Remove(selectedObject);
@@ -86,6 +92,7 @@ public class CharacterSelection : MonoBehaviour
                         }
                         else if (peopleOnBoard.Contains(selectedObject) && bankSideRight)
                         {
+                            //Adding Missionary to the Right bank from the boat
                             rayHit.transform.position = rightBank;
                             rayHit.transform.parent = null;
                             peopleOnBoard.Remove(selectedObject);
@@ -95,22 +102,27 @@ public class CharacterSelection : MonoBehaviour
                     else if (rayHit.collider.CompareTag("Cannibal"))
                     {
                         //cannibal
-                        if (IfCannibalOnLeftBank(selectedObject) && peopleOnBoard.Count < 2 && !peopleOnBoard.Contains(selectedObject))
+                        if (peopleOnBoard.Count < 2 && !peopleOnBoard.Contains(selectedObject) && !bankSideRight && CannibalLeft.Contains(selectedObject))
                         {
+                            //Adding Cannibal to the boat from Left Bank
                             rayHit.transform.parent = boat.transform;
                             rayHit.transform.localPosition = boatTop;
                             CannibalLeft.Remove(selectedObject);
+                            // CannibalRight.Add(selectedObject);
                             peopleOnBoard.Add(selectedObject);
                         }
-                        else if (!IfCannibalOnLeftBank(selectedObject) && peopleOnBoard.Count < 2 && !peopleOnBoard.Contains(selectedObject))
+                        else if (peopleOnBoard.Count < 2 && !peopleOnBoard.Contains(selectedObject) && bankSideRight && CannibalRight.Contains(selectedObject))
                         {
+                            // Adding Cannibal to boat from the right bank
                             rayHit.transform.parent = boat.transform;
                             rayHit.transform.localPosition = boatTop;
                             CannibalRight.Remove(selectedObject);
+                            // CannibalLeft.Add(selectedObject);
                             peopleOnBoard.Add(selectedObject);
                         }
                         else if (peopleOnBoard.Contains(selectedObject) && !bankSideRight)
                         {
+                            //Adding Cannibal to the Left bank from boat
                             rayHit.transform.position = leftBank;
                             rayHit.transform.parent = null;
                             peopleOnBoard.Remove(selectedObject);
@@ -118,6 +130,7 @@ public class CharacterSelection : MonoBehaviour
                         }
                         else if (peopleOnBoard.Contains(selectedObject) && bankSideRight)
                         {
+                            // Adding Cannibal to the Right bank from boat
                             rayHit.transform.position = rightBank;
                             rayHit.transform.parent = null;
                             peopleOnBoard.Remove(selectedObject);
@@ -127,36 +140,11 @@ public class CharacterSelection : MonoBehaviour
 
                 }
             }
-        // }
-        // else
-        // {
-        //     Debug.Log("Game Over");
-        // }
     }
-    public bool IfMissionaryOnLeftBank(GameObject Side)
-    {
-        if (bankSideRight)
-        {
-            return MissionaryRight.Contains(Side);
-        }
-        else
-        {
-            return MissionaryLeft.Contains(Side);
-        }
-    }
-    public bool IfCannibalOnLeftBank(GameObject Side)
-    {
-        if (bankSideRight)
-        {
-            return CannibalRight.Contains(Side);
-        }
-        else
-        {
-            return CannibalLeft.Contains(Side);
-        }
-    }
+
     IEnumerator MoveBoat(GameObject boat,Vector2 PositionToMove)
     {
+
         if((MissionaryLeft.Count == 1 && CannibalLeft.Count == 2)||(MissionaryRight.Count == 1 && CannibalRight.Count == 2) || (MissionaryLeft.Count == 1 && CannibalLeft.Count == 3)||(MissionaryRight.Count == 1 && CannibalRight.Count == 3) || (MissionaryLeft.Count == 2 && CannibalLeft.Count == 3)||(MissionaryRight.Count == 2 && CannibalRight.Count == 3)){
             Debug.Log("Game Over!!!");
         }
@@ -174,20 +162,17 @@ public class CharacterSelection : MonoBehaviour
             yield return null;
 
         }
-        
+        //TeleportCharacterOnBoard();
         AllowSelection = true;
-        }
-        //   if(bankSideRight){
-        //     Debug.Log("Left Bank: "+ MissionaryLeft.Count +"M and "+ CannibalLeft.Count + "C");
-        //     Debug.Log("Right Bank: "+ MissionaryRight.Count +"M and "+ CannibalRight.Count + "C");
-        //     Debug.Log("Boat going towards: Left");
-        // }
-        // else{
-        //      Debug.Log("Left Bank: "+ MissionaryLeft.Count +"M and "+ CannibalLeft.Count + "C");
-        //     Debug.Log("Right Bank: "+ MissionaryRight.Count +"M and "+ CannibalRight.Count + "C");
-        //     Debug.Log("Boat going towards: Right");
-        // }
-        
+        }        
          
     }
 }
+
+// public void TeleportCharacterOnBoard(){
+//     if(bankSideRight){
+//         if(peopleOnBoard.Count == 1){
+        
+//         }
+//     }
+// }
