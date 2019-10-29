@@ -15,6 +15,7 @@ public class CharacterSelection : MonoBehaviour
     readonly Vector2 rightBank = new Vector2(7.5f,-2.8f);
     public bool bankSideRight = false;
     public bool AllowSelection = true;
+    public int countSteps = 0;
     public List<GameObject> peopleOnBoard = new List<GameObject>(2);
 
     void Start()
@@ -42,6 +43,7 @@ public class CharacterSelection : MonoBehaviour
                     if (rayHit.collider.CompareTag("Boat"))
                     {
                         //boat goes here
+                        countSteps++;
                         if (peopleOnBoard.Count > 0)
                         {
                             if (!bankSideRight)
@@ -70,7 +72,7 @@ public class CharacterSelection : MonoBehaviour
                             rayHit.transform.parent = boat.transform;
                             rayHit.transform.localPosition = boatTop;
                             MissionaryLeft.Remove(selectedObject);
-                            // MissionaryRight.Add(selectedObject);
+                            MissionaryRight.Add(selectedObject);
                             peopleOnBoard.Add(selectedObject);
                         }
                         else if ( peopleOnBoard.Count < 2 && !peopleOnBoard.Contains(selectedObject) && bankSideRight && MissionaryRight.Contains(selectedObject))
@@ -79,24 +81,26 @@ public class CharacterSelection : MonoBehaviour
                             rayHit.transform.parent = boat.transform;
                             rayHit.transform.localPosition = boatTop;
                             MissionaryRight.Remove(selectedObject);
-                            // MissionaryLeft.Add(selectedObject);
+                            MissionaryLeft.Add(selectedObject);
                             peopleOnBoard.Add(selectedObject);
                         }
                         else if (peopleOnBoard.Contains(selectedObject) && !bankSideRight)
                         {
                             //Adding Missionary to the Left Bank from the boat
                             rayHit.transform.position = leftBank;
-                            rayHit.transform.parent = null;
+                            // rayHit.transform.parent = null;
                             peopleOnBoard.Remove(selectedObject);
                             MissionaryLeft.Add(selectedObject);
+                            MissionaryRight.Remove(selectedObject);
                         }
                         else if (peopleOnBoard.Contains(selectedObject) && bankSideRight)
                         {
                             //Adding Missionary to the Right bank from the boat
                             rayHit.transform.position = rightBank;
-                            rayHit.transform.parent = null;
+                            // rayHit.transform.parent = null;
                             peopleOnBoard.Remove(selectedObject);
                             MissionaryRight.Add(selectedObject);
+                            MissionaryLeft.Remove(selectedObject);
                         }
                     }
                     else if (rayHit.collider.CompareTag("Cannibal"))
@@ -108,7 +112,7 @@ public class CharacterSelection : MonoBehaviour
                             rayHit.transform.parent = boat.transform;
                             rayHit.transform.localPosition = boatTop;
                             CannibalLeft.Remove(selectedObject);
-                            // CannibalRight.Add(selectedObject);
+                            CannibalRight.Add(selectedObject);
                             peopleOnBoard.Add(selectedObject);
                         }
                         else if (peopleOnBoard.Count < 2 && !peopleOnBoard.Contains(selectedObject) && bankSideRight && CannibalRight.Contains(selectedObject))
@@ -117,7 +121,7 @@ public class CharacterSelection : MonoBehaviour
                             rayHit.transform.parent = boat.transform;
                             rayHit.transform.localPosition = boatTop;
                             CannibalRight.Remove(selectedObject);
-                            // CannibalLeft.Add(selectedObject);
+                            CannibalLeft.Add(selectedObject);
                             peopleOnBoard.Add(selectedObject);
                         }
                         else if (peopleOnBoard.Contains(selectedObject) && !bankSideRight)
@@ -127,14 +131,16 @@ public class CharacterSelection : MonoBehaviour
                             rayHit.transform.parent = null;
                             peopleOnBoard.Remove(selectedObject);
                             CannibalLeft.Add(selectedObject);
+                            CannibalRight.Remove(selectedObject);
                         }
                         else if (peopleOnBoard.Contains(selectedObject) && bankSideRight)
                         {
                             // Adding Cannibal to the Right bank from boat
                             rayHit.transform.position = rightBank;
-                            rayHit.transform.parent = null;
+                             rayHit.transform.parent = null;
                             peopleOnBoard.Remove(selectedObject);
                             CannibalRight.Add(selectedObject);
+                            CannibalLeft.Remove(selectedObject);
                         }
                     }
 
@@ -145,10 +151,7 @@ public class CharacterSelection : MonoBehaviour
     IEnumerator MoveBoat(GameObject boat,Vector2 PositionToMove)
     {
 
-        if((MissionaryLeft.Count == 1 && CannibalLeft.Count == 2)||(MissionaryRight.Count == 1 && CannibalRight.Count == 2) || (MissionaryLeft.Count == 1 && CannibalLeft.Count == 3)||(MissionaryRight.Count == 1 && CannibalRight.Count == 3) || (MissionaryLeft.Count == 2 && CannibalLeft.Count == 3)||(MissionaryRight.Count == 2 && CannibalRight.Count == 3)){
-            Debug.Log("Game Over!!!");
-        }
-        else{
+       
         AllowSelection = false;
         
         while(true)
@@ -162,17 +165,50 @@ public class CharacterSelection : MonoBehaviour
             yield return null;
 
         }
-        //TeleportCharacterOnBoard();
+        TeleportCharacterOnBoard();
         AllowSelection = true;
+
+        //Game Over Condition
+        if((MissionaryLeft.Count == 1 && CannibalLeft.Count == 2)||(MissionaryRight.Count == 1 && CannibalRight.Count == 2) || (MissionaryLeft.Count == 1 && CannibalLeft.Count == 3)||(MissionaryRight.Count == 1 && CannibalRight.Count == 3) || (MissionaryLeft.Count == 2 && CannibalLeft.Count == 3)||(MissionaryRight.Count == 2 && CannibalRight.Count == 3)){
+            Debug.Log("Game Over!!!");
+            AllowSelection = false;
+        }
+
+        // Win Condition
+        if((MissionaryRight.Count == 3) && (CannibalRight.Count == 3)){
+            Debug.Log("Awesome!!! U solved the Missionary Cannibal Problem in " + countSteps + " steps");
+            AllowSelection = false;
         }        
          
     }
+
+    public void TeleportCharacterOnBoard(){
+    if(bankSideRight){
+        if(peopleOnBoard.Count == 1){
+            peopleOnBoard[0].transform.position = rightBank;
+            peopleOnBoard[0].transform.parent = null;        
+        }
+     else{
+            peopleOnBoard[0].transform.position = rightBank;
+            peopleOnBoard[1].transform.position = rightBank;
+            peopleOnBoard[0].transform.parent = null;
+            peopleOnBoard[1].transform.parent = null;
+     }
+    }
+    if(!bankSideRight){
+        if(peopleOnBoard.Count == 1){
+            peopleOnBoard[0].transform.position = leftBank;
+            peopleOnBoard[0].transform.parent = null;        
+        }
+     else{
+            peopleOnBoard[0].transform.position = leftBank;
+            peopleOnBoard[1].transform.position = leftBank;
+            peopleOnBoard[0].transform.parent = null;
+            peopleOnBoard[1].transform.parent = null;
+     }
+    }
+    peopleOnBoard.Clear();
+}
 }
 
-// public void TeleportCharacterOnBoard(){
-//     if(bankSideRight){
-//         if(peopleOnBoard.Count == 1){
-        
-//         }
-//     }
-// }
+
